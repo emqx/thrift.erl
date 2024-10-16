@@ -43,22 +43,26 @@
                        framed = false,
                        ssloptions = []}).
 
-parse_factory_options([], Opts) ->
-    Opts;
-parse_factory_options([{framed, Bool} | Rest], Opts) when is_boolean(Bool) ->
-    parse_factory_options(Rest, Opts#factory_opts{framed=Bool});
-parse_factory_options([{sockopts, OptList} | Rest], Opts) when is_list(OptList) ->
-    parse_factory_options(Rest, Opts#factory_opts{sockopts=OptList});
-parse_factory_options([{connect_timeout, TO} | Rest], Opts) when TO =:= infinity; is_integer(TO) ->
-    parse_factory_options(Rest, Opts#factory_opts{connect_timeout=TO});
-parse_factory_options([{ssloptions, SslOptions} | Rest], Opts) when is_list(SslOptions) ->
-    parse_factory_options(Rest, Opts#factory_opts{ssloptions=SslOptions}).
+parse_factory_options([{framed, Bool}|Rest], FactoryOpts, TransOpts)
+when is_boolean(Bool) ->
+  parse_factory_options(Rest, FactoryOpts#factory_opts{framed = Bool}, TransOpts);
+parse_factory_options([{sockopts, OptList}|Rest], FactoryOpts, TransOpts)
+when is_list(OptList) ->
+  parse_factory_options(Rest, FactoryOpts#factory_opts{sockopts = OptList}, TransOpts);
+parse_factory_options([{connect_timeout, TO}|Rest], FactoryOpts, TransOpts)
+when TO =:= infinity; is_integer(TO) ->
+  parse_factory_options(Rest, FactoryOpts#factory_opts{connect_timeout = TO}, TransOpts);
+parse_factory_options([{ssloptions, SslOptions} | Rest], FactoryOpts, TransOpts) when is_list(SslOptions) ->
+    parse_factory_options(Rest, FactoryOpts#factory_opts{ssloptions=SslOptions}, TransOpts);
+parse_factory_options([{recv_timeout, TO}|Rest], FactoryOpts, TransOpts)
+when TO =:= infinity; is_integer(TO) ->
+  parse_factory_options(Rest, FactoryOpts, [{recv_timeout, TO}] ++ TransOpts).
 
 new(Socket, SockOpts, SslOptions) when is_list(SockOpts), is_list(SslOptions) ->
     inet:setopts(Socket, [{active, false}]), %% => prevent the ssl handshake messages get lost
 
     %% upgrade to an ssl socket
-    case catch ssl:ssl_accept(Socket, SslOptions) of % infinite timeout
+    case catch ssl:ssl_handshake(Socket, SslOptions) of % infinite timeout
         {ok, SslSocket} ->
             new(SslSocket, SockOpts);
         {error, Reason} ->
@@ -71,9 +75,9 @@ new(Socket, SockOpts, SslOptions) when is_list(SockOpts), is_list(SslOptions) ->
             exit({error, ssl_accept_failed})
     end.
 
-new(SslSocket, SockOpts) ->
+new(SslSocket, Opts) ->
     State =
-        case lists:keysearch(recv_timeout, 1, SockOpts) of
+        case lists:keysearch(recv_timeout, 1, Opts) of
             {value, {recv_timeout, Timeout}}
               when is_integer(Timeout), Timeout > 0 ->
                 #data{socket=SslSocket, recv_timeout=Timeout};
@@ -113,19 +117,19 @@ close(This = #data{socket = Socket}) ->
 %% thrift server over a socket.
 %%
 new_transport_factory(Host, Port, Options) ->
-    ParsedOpts = parse_factory_options(Options, #factory_opts{}),
+    {FactoryOpts, TransOpts} = parse_factory_options(Options, #factory_opts{}, []),
 
     F = fun() ->
                 SockOpts = [binary,
                             {packet, 0},
                             {active, false},
                             {nodelay, true} |
-                            ParsedOpts#factory_opts.sockopts],
+                            FactoryOpts#factory_opts.sockopts],
                 case catch gen_tcp:connect(Host, Port, SockOpts,
-                                           ParsedOpts#factory_opts.connect_timeout) of
+                                           FactoryOpts#factory_opts.connect_timeout) of
                     {ok, Sock} ->
-                        SslSock = case catch ssl:connect(Sock, ParsedOpts#factory_opts.ssloptions,
-                                                         ParsedOpts#factory_opts.connect_timeout) of
+                        SslSock = case catch ssl:connect(Sock, FactoryOpts#factory_opts.ssloptions,
+                                                         FactoryOpts#factory_opts.connect_timeout) of
                                       {ok, SslSocket} ->
                                           SslSocket;
                                       Other ->
@@ -133,9 +137,9 @@ new_transport_factory(Host, Port, Options) ->
                                           catch gen_tcp:close(Sock),
                                           exit(error)
                                   end,
-                        {ok, Transport} = thrift_sslsocket_transport:new(SslSock, SockOpts),
+                        {ok, Transport} = thrift_sslsocket_transport:new(SslSock, TransOpts),
                         {ok, BufTransport} =
-                            case ParsedOpts#factory_opts.framed of
+                            case FactoryOpts#factory_opts.framed of
                                 true  -> thrift_framed_transport:new(Transport);
                                 false -> thrift_buffered_transport:new(Transport)
                             end,
