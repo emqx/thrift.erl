@@ -43,6 +43,7 @@
                        framed = false,
                        ssloptions = []}).
 
+parse_factory_options([], FactoryOpts, TransOpts) -> {FactoryOpts, TransOpts};
 parse_factory_options([{framed, Bool}|Rest], FactoryOpts, TransOpts)
 when is_boolean(Bool) ->
   parse_factory_options(Rest, FactoryOpts#factory_opts{framed = Bool}, TransOpts);
