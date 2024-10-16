@@ -136,7 +136,7 @@ new_transport_factory(Host, Port, Options) ->
                                       Other ->
                                           error_logger:info_msg("error while connecting over ssl - reason: ~p~n", [Other]),
                                           catch gen_tcp:close(Sock),
-                                          exit(error)
+                                          exit(Other)
                                   end,
                         {ok, Transport} = thrift_sslsocket_transport:new(SslSock, TransOpts),
                         {ok, BufTransport} =
