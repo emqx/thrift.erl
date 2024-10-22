@@ -170,7 +170,10 @@ new_transport_factory(Host, Port, Options) ->
           false -> thrift_buffered_transport:new(Transport)
         end,
         {ok, BufTransport};
-      Error  -> Error
+      {error, _} = Error ->
+        Error;
+      Error  ->
+        {error, Error}
     end
   end}.
 

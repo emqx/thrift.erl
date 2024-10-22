@@ -133,10 +133,11 @@ new_transport_factory(Host, Port, Options) ->
                                                          FactoryOpts#factory_opts.connect_timeout) of
                                       {ok, SslSocket} ->
                                           SslSocket;
+                                      {error, Error} = Error ->
+                                          Error;
                                       Other ->
-                                          error_logger:info_msg("error while connecting over ssl - reason: ~p~n", [Other]),
                                           catch gen_tcp:close(Sock),
-                                          exit(Other)
+                                          {error, Other}
                                   end,
                         {ok, Transport} = thrift_sslsocket_transport:new(SslSock, TransOpts),
                         {ok, BufTransport} =
@@ -145,8 +146,10 @@ new_transport_factory(Host, Port, Options) ->
                                 false -> thrift_buffered_transport:new(Transport)
                             end,
                         {ok, BufTransport};
+                    {error, Error} = Error ->
+                       Error;
                     Error  ->
-                        Error
+                        {error, Error}
                 end
         end,
     {ok, F}.
