@@ -95,7 +95,7 @@ read(This = #data{socket=Socket, recv_timeout=Timeout}, Len)
   when is_integer(Len), Len >= 0 ->
     case ssl:recv(Socket, Len, Timeout) of
         Err = {error, timeout} ->
-            error_logger:info_msg("read timeout: peer conn ~p", [inet:peername(Socket)]),
+            error_logger:info_msg("read timeout: peer conn ~p", [Socket]),
             ssl:close(Socket),
             {This, Err};
         Data ->
