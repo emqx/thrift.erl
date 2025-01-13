@@ -129,23 +129,23 @@ new_transport_factory(Host, Port, Options) ->
                 case catch gen_tcp:connect(Host, Port, SockOpts,
                                            FactoryOpts#factory_opts.connect_timeout) of
                     {ok, Sock} ->
-                        SslSock = case catch ssl:connect(Sock, FactoryOpts#factory_opts.ssloptions,
-                                                         FactoryOpts#factory_opts.connect_timeout) of
-                                      {ok, SslSocket} ->
-                                          SslSocket;
-                                      {error, Error} = Error ->
-                                          Error;
-                                      Other ->
-                                          catch gen_tcp:close(Sock),
-                                          {error, Other}
-                                  end,
-                        {ok, Transport} = thrift_sslsocket_transport:new(SslSock, TransOpts),
-                        {ok, BufTransport} =
-                            case FactoryOpts#factory_opts.framed of
-                                true  -> thrift_framed_transport:new(Transport);
-                                false -> thrift_buffered_transport:new(Transport)
-                            end,
-                        {ok, BufTransport};
+                        case catch ssl:connect(Sock, FactoryOpts#factory_opts.ssloptions,
+                                               FactoryOpts#factory_opts.connect_timeout) of
+                            {ok, SslSock} ->
+                                {ok, Transport} = thrift_sslsocket_transport:new(SslSock, TransOpts),
+                                {ok, BufTransport} =
+                                    case FactoryOpts#factory_opts.framed of
+                                        true  -> thrift_framed_transport:new(Transport);
+                                        false -> thrift_buffered_transport:new(Transport)
+                                    end,
+                                {ok, BufTransport};
+                            {error, Error} = Error ->
+                                catch gen_tcp:close(Sock),
+                                Error;
+                            Other ->
+                                catch gen_tcp:close(Sock),
+                                {error, Other}
+                        end;
                     {error, Error} = Error ->
                        Error;
                     Error  ->
