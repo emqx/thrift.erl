@@ -56,7 +56,6 @@
 typeid_to_json(?tType_BOOL) -> "tf";
 typeid_to_json(?tType_BYTE) -> "i8";
 typeid_to_json(?tType_DOUBLE) -> "dbl";
-typeid_to_json(?tType_I8) -> "i8";
 typeid_to_json(?tType_I16) -> "i16";
 typeid_to_json(?tType_I32) -> "i32";
 typeid_to_json(?tType_I64) -> "i64";
