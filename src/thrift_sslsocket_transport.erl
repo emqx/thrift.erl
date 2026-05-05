@@ -18,7 +18,6 @@
 %%
 -module(thrift_sslsocket_transport).
 
--include("thrift_transport_behaviour.hrl").
 
 -behaviour(thrift_transport).
 
@@ -32,7 +31,6 @@
 
 -record(data, {socket,
                recv_timeout=infinity}).
--type state() :: #data{}.
 
 %% The following "local" record is filled in by parse_factory_options/2
 %% below. These options can be passed to new_protocol_factory/3 in a
@@ -63,7 +61,7 @@ new(Socket, SockOpts, SslOptions) when is_list(SockOpts), is_list(SslOptions) ->
     inet:setopts(Socket, [{active, false}]), %% => prevent the ssl handshake messages get lost
 
     %% upgrade to an ssl socket
-    case catch ssl:ssl_handshake(Socket, SslOptions) of % infinite timeout
+    case catch ssl:handshake(Socket, SslOptions) of % infinite timeout
         {ok, SslSocket} ->
             new(SslSocket, SockOpts);
         {error, Reason} ->

@@ -31,14 +31,13 @@
   buffer = []
 }).
 
--type state() :: #t_membuffer{}.
 
 
--spec new() -> thrift_transport:t_transport().
+-spec new() -> {ok, thrift_transport:t_transport()}.
 
 new() -> new([]).
 
--spec new(Buf::iodata()) -> thrift_transport:t_transport().
+-spec new(Buf::iodata()) -> {ok, thrift_transport:t_transport()}.
 
 new(Buf) when is_list(Buf) ->
   State = #t_membuffer{buffer = Buf},
@@ -48,7 +47,6 @@ new(Buf) when is_binary(Buf) ->
   thrift_transport:new(?MODULE, State).
 
 
--include("thrift_transport_behaviour.hrl").
 
 
 read(State = #t_membuffer{buffer = Buf}, Len)

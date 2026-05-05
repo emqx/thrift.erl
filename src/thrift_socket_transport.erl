@@ -35,16 +35,15 @@
   buffer = []
 }).
 
--type state() :: #t_socket{}.
 
 
 -spec new(Socket::any()) ->
-  thrift_transport:t_transport().
+  {ok, thrift_transport:t_transport()}.
 
 new(Socket) -> new(Socket, []).
 
 -spec new(Socket::any(), Opts::list()) ->
-  thrift_transport:t_transport().
+  {ok, thrift_transport:t_transport()}.
 
 new(Socket, Opts) when is_list(Opts) ->
   State = parse_opts(Opts, #t_socket{socket = Socket}),
@@ -60,7 +59,6 @@ parse_opts([], State) ->
   State.
 
 
--include("thrift_transport_behaviour.hrl").
 
 
 read(State = #t_socket{buffer = Buf}, Len)

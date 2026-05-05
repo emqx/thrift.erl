@@ -35,8 +35,6 @@
                        close_on_close = false,
                        sync_every = infinity,
                        sync_tref}).
--type state() :: #dl_transport{}.
--include("thrift_transport_behaviour.hrl").
 
 
 %% Create a transport attached to an already open log.
@@ -94,7 +92,7 @@ flush(This = #dl_transport{log = Log, sync_every = SE}) ->
 close(This = #dl_transport{close_on_close = false}) ->
     {This, ok};
 close(This = #dl_transport{log = Log}) ->
-    {This, disk_log:lclose(Log)}.
+    {This, disk_log:close(Log)}.
 
 
 %%%% FACTORY GENERATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

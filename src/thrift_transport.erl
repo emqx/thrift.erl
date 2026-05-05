@@ -19,7 +19,6 @@
 
 -module(thrift_transport).
 
--export([behaviour_info/1]).
 %% constructors
 -export([new/1, new/2]).
 %% transport callbacks
@@ -27,9 +26,14 @@
 
 -export_type([t_transport/0]).
 
-
-behaviour_info(callbacks) ->
-  [{read, 2}, {write, 2}, {flush, 1}, {close, 1}].
+-callback read(State :: term(), non_neg_integer()) ->
+    {NewState :: term(), {ok, binary()} | {error, term()}}.
+-callback write(State :: term(), iolist() | binary()) ->
+    {NewState :: term(), ok | {error, term()}}.
+-callback flush(State :: term()) ->
+    {NewState :: term(), ok | {error, term()}}.
+-callback close(State :: term()) ->
+    {NewState :: term(), ok | {error, term()}}.
 
 
 -record(t_transport, {

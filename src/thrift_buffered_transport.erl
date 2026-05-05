@@ -34,11 +34,10 @@
   write_buffer
 }).
 
--type state() :: #t_buffered{}.
 
 
 -spec new(Transport::thrift_transport:t_transport()) ->
-  thrift_transport:t_transport().
+  {ok, thrift_transport:t_transport()}.
 
 new(Wrapped) ->
   State = #t_buffered{
@@ -48,7 +47,6 @@ new(Wrapped) ->
   thrift_transport:new(?MODULE, State).
 
 
--include("thrift_transport_behaviour.hrl").
 
 
 %% reads data through from the wrapped transport

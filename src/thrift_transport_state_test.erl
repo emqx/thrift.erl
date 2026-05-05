@@ -36,8 +36,6 @@
                 version :: integer(),
                 counter :: pid()
                }).
--type state() :: #trans{}.
--include("thrift_transport_behaviour.hrl").
 
 -record(state, {cversion :: integer()}).
 

@@ -35,16 +35,15 @@
   mode = write
 }).
 
--type state() :: #t_file{}.
 
 
 -spec new(Device::file:io_device()) ->
-  thrift_transport:t_transport().
+  {ok, thrift_transport:t_transport()}.
 
 new(Device) -> new(Device, []).
 
 -spec new(Device::file:io_device(), Opts::list()) ->
-  thrift_transport:t_transport().
+  {ok, thrift_transport:t_transport()}.
 
 %% Device should be opened in raw and binary mode.
 new(Device, Opts) when is_list(Opts) ->
@@ -62,7 +61,6 @@ parse_opts([], State) ->
   State.
 
 
--include("thrift_transport_behaviour.hrl").
 
 
 read(State = #t_file{device = Device, mode = read}, Len)

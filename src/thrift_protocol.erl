@@ -29,21 +29,24 @@
          typeid_to_atom/1
         ]).
 
--export([behaviour_info/1]).
-
 -include("thrift_constants.hrl").
 -include("thrift_protocol.hrl").
 
 -record(protocol, {module, data}).
 
-behaviour_info(callbacks) ->
-    [
-     {read, 2},
-     {write, 2},
-     {flush_transport, 1},
-     {close_transport, 1}
-    ];
-behaviour_info(_Else) -> undefined.
+-callback flush_transport(State :: term()) ->
+    {NewState :: term(), ok | {error, term()}}.
+-callback close_transport(State :: term()) ->
+    {NewState :: term(), ok | {error, term()}}.
+-callback write(State :: term(), term()) ->
+    {NewState :: term(), ok | {error, term()}}.
+-callback read
+        (State :: term(), tprot_empty_tag()) ->
+            {NewState :: term(), ok | {error, term()}};
+        (State :: term(), tprot_header_tag()) ->
+            {NewState :: term(), tprot_header_val() | {error, term()}};
+        (State :: term(), tprot_data_tag()) ->
+            {NewState :: term(), {ok, term()} | {error, term()}}.
 
 new(Module, Data) when is_atom(Module) ->
     {ok, #protocol{module = Module,

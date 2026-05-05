@@ -39,8 +39,7 @@ call(Client = #tclient{}, Function, Args)
 when is_atom(Function), is_list(Args) ->
   case send_function_call(Client, Function, Args) of
     {ok, Client1} -> receive_function_result(Client1, Function);
-    {{error, X}, Client1} -> {Client1, {error, X}};
-    Else -> Else
+    {{error, X}, Client1} -> {Client1, {error, X}}
   end.
 
 
