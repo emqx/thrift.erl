@@ -184,25 +184,8 @@ init(State=#thrift_socket_server{ip=Ip, port=Port}) ->
                    [{ip, Ip} | BaseOpts]
            end,
     case gen_tcp_listen(Port, Opts, State) of
-        {stop, eacces} ->
-            %% fdsrv module allows another shot to bind
-            %% ports which require root access
-            case Port < 1024 of
-                true ->
-                    case fdsrv:start() of
-                        {ok, _} ->
-                            case fdsrv:bind_socket(tcp, Port) of
-                                {ok, Fd} ->
-                                    gen_tcp_listen(Port, [{fd, Fd} | Opts], State);
-                                _ ->
-                                    {stop, fdsrv_bind_failed}
-                            end;
-                        _ ->
-                            {stop, fdsrv_start_failed}
-                    end;
-                false ->
-                    {stop, eacces}
-            end;
+        {stop, _Reason} = Stop ->
+            Stop;
         Other ->
             error_logger:info_msg("thrift service listening on port ~p", [Port]),
             Other
@@ -276,18 +259,12 @@ handle_cast({accepted, Pid},
 handle_cast(stop, State) ->
     {stop, normal, State}.
 
-terminate(Reason, #thrift_socket_server{listen=Listen, port=Port}) ->
+terminate(Reason, #thrift_socket_server{listen=Listen}) ->
     gen_tcp:close(Listen),
     {backtrace, Bt} = erlang:process_info(self(), backtrace),
     error_logger:error_report({?MODULE, ?LINE,
                                {child_error, Reason, Bt}}),
-    case Port < 1024 of
-        true ->
-            catch fdsrv:stop(),
-            ok;
-        false ->
-            ok
-    end.
+    ok.
 
 code_change(_OldVsn, State, _Extra) ->
     State.
