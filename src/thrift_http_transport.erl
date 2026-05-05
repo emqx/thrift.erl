@@ -34,8 +34,6 @@
                          http_options, % see http(3)
                          extra_headers % [{str(), str()}, ...]
                         }).
--type state() :: #http_transport{}.
--include("thrift_transport_behaviour.hrl").
 
 new(Host, Path) ->
     new(Host, Path, _Options = []).

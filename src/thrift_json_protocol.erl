@@ -47,8 +47,6 @@
     context_stack = [],
     jsx
 }).
--type state() :: #json_protocol{}.
--include("thrift_protocol_behaviour.hrl").
 
 -define(VERSION_1, 1).
 -define(JSON_DOUBLE_PRECISION, 16).

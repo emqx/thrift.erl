@@ -44,8 +44,6 @@
                            write_stack=[],
                            write_id=?ID_NONE
                           }).
--type state() :: #t_compact{}.
--include("thrift_protocol_behaviour.hrl").
 
 -define(PROTOCOL_ID, 16#82).
 -define(VERSION_MASK, 16#1f).
@@ -124,7 +122,8 @@ to_varint(Value, Acc) when (Value < 16#80) -> [Acc, Value];
 to_varint(Value, Acc) ->
   to_varint(Value bsr 7, [Acc, ((Value band 16#7F) bor 16#80)]).
 
--spec read_varint(#t_compact{}, non_neg_integer(), non_neg_integer()) -> non_neg_integer().
+-spec read_varint(#t_compact{}, non_neg_integer(), non_neg_integer()) ->
+  {#t_compact{}, {ok, non_neg_integer()}}.
 read_varint(This0, Acc, Count) ->
   {This1, {ok, Byte}} = read(This0, byte),
   case (Byte band 16#80) of
@@ -262,8 +261,8 @@ read(This = #t_compact{read_stack = [_H|T]}, struct_end) ->
 read(This0 = #t_compact{read_stack = [LastId|T]}, field_begin) ->
   {This1, {ok, Byte}} = read(This0, ubyte),
   case Byte band 16#f of
-    CompactType = ?tType_STOP ->
-      {This1, #protocol_field_begin{type = CompactType}};
+    ?tType_STOP ->
+      {This1, #protocol_field_begin{type = ?tType_STOP}};
     CompactType ->
       {This2, {ok, Id}} = case Byte bsr 4 of
                             0 -> read(This1, i16);

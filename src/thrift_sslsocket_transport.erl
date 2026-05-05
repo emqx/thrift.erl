@@ -18,7 +18,6 @@
 %%
 -module(thrift_sslsocket_transport).
 
--include("thrift_transport_behaviour.hrl").
 
 -behaviour(thrift_transport).
 
@@ -32,7 +31,6 @@
 
 -record(data, {socket,
                recv_timeout=infinity}).
--type state() :: #data{}.
 
 %% The following "local" record is filled in by parse_factory_options/2
 %% below. These options can be passed to new_protocol_factory/3 in a

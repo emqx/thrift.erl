@@ -24,7 +24,6 @@
 -include("thrift_constants.hrl").
 -include("thrift_protocol.hrl").
 
--include("thrift_protocol_behaviour.hrl").
 
 -export([new/2,
          read/2,
@@ -40,7 +39,6 @@
 								protocol_data_to_decorate::term(),
 								service_name::nonempty_string()}).
 
--type state() :: #multiplexed_protocol{}.
 
 -spec new(ProtocolToDecorate::protocol(), ServiceName::nonempty_string()) -> {ok, Protocol::protocol()}.
 new(ProtocolToDecorate, ServiceName) when is_record(ProtocolToDecorate, protocol),

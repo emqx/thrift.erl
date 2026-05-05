@@ -20,12 +20,20 @@
 -ifndef(THRIFT_PROTOCOL_INCLUDED).
 -define(THRIFT_PROTOCOL_INCLUDED, true).
 
--record(protocol_message_begin, {name :: string(), type :: integer(), seqid :: integer()}).
--record(protocol_struct_begin, {name :: string()}).
--record(protocol_field_begin, {name :: string(), type :: integer(), id :: integer()}).
--record(protocol_map_begin, {ktype :: integer(), vtype :: integer(), size :: integer()}).
--record(protocol_list_begin, {etype :: integer(), size :: integer()}).
--record(protocol_set_begin, {etype :: integer(), size :: integer()}).
+-record(protocol_message_begin, {name :: string() | undefined,
+                                 type :: integer() | undefined,
+                                 seqid :: integer() | undefined}).
+-record(protocol_struct_begin, {name :: string() | undefined}).
+-record(protocol_field_begin, {name :: string() | undefined,
+                               type :: integer() | undefined,
+                               id :: integer() | undefined}).
+-record(protocol_map_begin, {ktype :: integer() | undefined,
+                             vtype :: integer() | undefined,
+                             size :: integer() | undefined}).
+-record(protocol_list_begin, {etype :: integer() | undefined,
+                              size :: integer() | undefined}).
+-record(protocol_set_begin, {etype :: integer() | undefined,
+                             size :: integer() | undefined}).
 
 -type tprot_header_val() :: #protocol_message_begin{}
                           | #protocol_struct_begin{}
